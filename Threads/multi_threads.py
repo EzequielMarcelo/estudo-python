@@ -1,21 +1,22 @@
 import threading
-import queue
+from collections import deque 
 import time
 
 def produtor(fila):
     for i in range(20):
-        time.sleep(0.5)  
+        time.sleep(0.1)  
         mensagem = f"Mensagem {i}"
-        fila.put(mensagem)
+        fila.append(mensagem)
         print(f"Produzido: {mensagem}")
 
 def consumidor(fila):
-    while fila.not_empty:
-        time.sleep(100) 
-        mensagem = fila.get()        
+    time.sleep(1.5) 
+    while fila:
+        time.sleep(1) 
+        mensagem = fila.popleft()        
         print(f"Consumido: {mensagem}")
 
-fila = queue.Queue(10)
+fila = deque(maxlen=10)
 
 produtor_thread = threading.Thread(target=produtor, args=(fila,))
 consumidor_thread = threading.Thread(target=consumidor, args=(fila,))
