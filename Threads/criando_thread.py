@@ -6,5 +6,5 @@ def funcao_thread():
 
 thread = threading.Thread(target=funcao_thread)
 thread.start()
-thread.join()
 print("Thread principal finalizada")
+thread.join()
