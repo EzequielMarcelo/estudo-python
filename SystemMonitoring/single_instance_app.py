@@ -4,6 +4,7 @@ import psutil
 import numpy as np
 import tkinter as tk
 from PIL import Image, ImageTk
+import logging
 
 def IsAlreadyRunning():
     current_pid = os.getpid()
@@ -33,6 +34,8 @@ def IsAlreadyRunning():
             # Verifica se algum argumento da linha de comando é o script/exe
             for arg in cmdline:
                 if os.path.basename(arg).lower() == current_program:
+                    logging.info(f"{proc.info['cmdline']}")
+                    logging.info(f"{proc.info['exe']}")
                     return True
                 
         except (psutil.NoSuchProcess, psutil.AccessDenied):
@@ -54,6 +57,17 @@ def loop():
 
 if IsAlreadyRunning():
     sys.exit()
+
+logging.basicConfig(
+    level=logging.DEBUG,
+    format="%(asctime)s [%(levelname)s] %(message)s",
+    handlers=[
+        logging.StreamHandler(),             
+        logging.FileHandler("app.log")   
+    ]
+)
+
+logging.info("Iniciando programa...")
 
 root = tk.Tk()
 root.title("Single Instance App")
