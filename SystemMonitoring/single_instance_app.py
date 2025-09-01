@@ -8,6 +8,8 @@ import logging
 
 def IsAlreadyRunning():
     current_pid = os.getpid()
+    proc_count = 0
+
     if getattr(sys, 'frozen', False):
         # Se for exe gerado pelo PyInstaller
         current_program = os.path.basename(sys.executable).lower()
@@ -34,9 +36,13 @@ def IsAlreadyRunning():
             # Verifica se algum argumento da linha de comando é o script/exe
             for arg in cmdline:
                 if os.path.basename(arg).lower() == current_program:
-                    logging.info(f"{proc.info['cmdline']}")
-                    logging.info(f"{proc.info['exe']}")
-                    return True
+                    # se estiver no modo one file o primeiro exe é para extrair os arquivos temporários
+                    if getattr(sys, 'frozen', False):
+                        proc_count += 1
+                        if proc_count >= 2:
+                            return True
+                    else:
+                        return True
                 
         except (psutil.NoSuchProcess, psutil.AccessDenied):
             continue
@@ -54,10 +60,6 @@ def loop():
     lmain.configure(image=imgtk)
     lmain.after(10, loop)
 
-
-if IsAlreadyRunning():
-    sys.exit()
-
 logging.basicConfig(
     level=logging.DEBUG,
     format="%(asctime)s [%(levelname)s] %(message)s",
@@ -66,6 +68,10 @@ logging.basicConfig(
         logging.FileHandler("app.log")   
     ]
 )
+
+if IsAlreadyRunning():
+    logging.warning("Já existe uma instância do programa rodando")
+    sys.exit()
 
 logging.info("Iniciando programa...")
 
